@@ -1,52 +1,43 @@
-import { useState } from "react";
-import { FaStar } from "react-icons/fa";
-import ReactDOM from "react-dom"
-import "./index.css"
+import { useState, useEffect } from "react";
+import "./index.css";
 
-const createArray =(length)=>[...Array(length)];
+function App() {
+  const [data, setData] = useState([]); 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-function Star ({selected = false , onSelect}){
-  return ( <FaStar color={selected ?"red": "grey"}
-  onClick={onSelect}
-  />);
+  useEffect(() => {
+    fetch("https://api.github.com/users")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch users");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setData(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(error.message);
+        setLoading(false);
+      });
+  }, []); 
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
+
+  return (
+    <ul>
+      {data.map((user) => (
+        <li key={user.id}>{user.login}</li> 
+      ))}
+    </ul>
+  );
 }
-
-function StarRating({ totalStars =5}){
-  const [selectedStars, setselectedStars] = useState(0);
-
-  return(<>
-     {createArray(totalStars).map((n,i)=>(
-    <Star
-    key={i} 
-    selected={ selectedStars > i}
-    onSelect={() => setselectedStars(i + 1)}
-    />
-  ))}
-  <p>
-  {selectedStars} of {totalStars}
-</p>
-</>
-)}
-
-function App(){
-  return (<StarRating totalStars={10}/>)
-}
-
-
-//////use stete\\\\\\
-// import './App.css';
-// import { useState } from 'react';
-// function App() {
-
-//   const [checked, setchecked] =useState("false")
-//   return (
-//     <>
-//        <h1>you are cute? <br/> </h1>
-//        <input type='checkbox' value={checked}
-//         onChange={() => setchecked((checked) => !checked)}/>
-//        <h4>{checked ? "checked" : "not checked"}</h4>
-//        </>
-//   );
-// }
 
 export default App;
